@@ -14,6 +14,7 @@ func TestCleanInput(t *testing.T) {
 
 	cases := tests{
 		"simple":    {input: " hello world ", expected: []string{"hello", "world"}},
+		"uppercase": {input: "HELLO world", expected: []string{"hello", "world"}},
 		"no spaces": {input: "hello", expected: []string{"hello"}},
 	}
 
