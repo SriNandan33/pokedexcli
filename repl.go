@@ -23,8 +23,7 @@ func startRepl(cfg *config) {
 				continue
 			}
 			command := cleaned[0]
-			supportedCommands := buildCommandRegistry()
-			c, ok := supportedCommands[command]
+			c, ok := cfg.commands[command]
 			if !ok {
 				fmt.Println("Unknown command")
 				continue
