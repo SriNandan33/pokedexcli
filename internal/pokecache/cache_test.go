@@ -1,75 +1,31 @@
 package pokecache
 
-import (
-	"testing"
+import "testing"
 
-	"github.com/google/go-cmp/cmp"
-)
-
-func TestCacheAdd(t *testing.T) {
+func TestAddGet(t *testing.T) {
 	cache := NewCache()
+	cache.Add("first", []byte("first value"))
+	cache.Add("second", []byte("second value"))
+	cache.Add("first", []byte("updated first value"))
 
-	val := []byte("test-value")
-	cache.Add("test", val)
-
-	expected := []byte("test-value")
-	got, ok := cache.Get("test")
-	if !ok {
-		t.Fatal("expected key to be present")
-	}
-	if diff := cmp.Diff(got, expected); diff != "" {
-		t.Fatalf("expected: %s, got: %s", expected, got)
-	}
-}
-
-func TestCacheAddSameKeyTwice(t *testing.T) {
-	cache := NewCache()
-	firstVal := []byte("test-value")
-	cache.Add("test", firstVal)
-
-	secondVal := []byte("updated-value")
-	cache.Add("test", secondVal)
-
-	expected := []byte("updated-value")
-	got, ok := cache.Get("test")
-	if !ok {
-		t.Fatal("expected key to be present")
-	}
-	if diff := cmp.Diff(got, expected); diff != "" {
-		t.Fatalf("expected: %s, got: %s", expected, got)
-	}
-}
-
-func TestCacheGetMissingKey(t *testing.T) {
-	cache := NewCache()
-
-	_, ok := cache.Get("test")
-
-	if ok {
-		t.Fatalf("expected: %v, got: %v", false, ok)
-	}
-}
-
-func TestAddTwoDifferentKeys(t *testing.T) {
-	cache := NewCache()
-	firstVal := []byte("test-one")
-	cache.Add("testOne", firstVal)
-
-	secondVal := []byte("test-two")
-	cache.Add("testTwo", secondVal)
-
-	first, ok := cache.Get("testOne")
-	if !ok {
-		t.Fatal("expected key to be present")
-	}
-	second, ok := cache.Get("testTwo")
-	if !ok {
-		t.Fatal("expected key to be present")
+	type test struct {
+		key   string
+		want  string
+		found bool
 	}
 
-	firstDiff := cmp.Diff(firstVal, first)
-	secondDiff := cmp.Diff(secondVal, second)
-	if firstDiff != "" || secondDiff != "" {
-		t.Fatal()
+	cases := []test{
+		{key: "first", want: "updated first value", found: true},
+		{key: "second", want: "second value", found: true},
+		{key: "notFound", found: false},
+	}
+
+	for _, c := range cases {
+		t.Run(c.key, func(t *testing.T) {
+			got, ok := cache.Get(c.key)
+			if ok != c.found || string(got) != c.want {
+				t.Fatalf("Get(%q) = %q, %v; Want: %q, %v", c.key, got, ok, c.want, c.found)
+			}
+		})
 	}
 }
