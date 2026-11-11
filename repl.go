@@ -11,7 +11,7 @@ func cleanInput(text string) []string {
 	return strings.Split(strings.Trim(strings.ToLower(text), " "), " ")
 }
 
-func startRepl() {
+func startRepl(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -30,7 +30,7 @@ func startRepl() {
 				continue
 			}
 
-			err := c.callback()
+			err := c.callback(cfg)
 			if err != nil {
 				fmt.Println("Error executing the command", err)
 			}
@@ -45,7 +45,7 @@ func startRepl() {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(cfg *config) error
 }
 
 func buildCommandRegistry() map[string]cliCommand {
@@ -61,4 +61,8 @@ func buildCommandRegistry() map[string]cliCommand {
 			callback:    commandHelp,
 		},
 	}
+}
+
+type config struct {
+	commands map[string]cliCommand
 }

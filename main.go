@@ -1,5 +1,9 @@
 package main
 
 func main() {
-	startRepl()
+	supportedCommands := buildCommandRegistry()
+	config := config{
+		commands: supportedCommands,
+	}
+	startRepl(&config)
 }
