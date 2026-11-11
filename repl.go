@@ -62,7 +62,7 @@ func buildCommandRegistry() map[string]cliCommand {
 		"map": {
 			name:        "map",
 			description: "Fetch next page of locations",
-			callback:    commandMap,
+			callback:    commandMapf,
 		},
 		"mapb": {
 			name:        "mapb",
