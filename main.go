@@ -5,8 +5,8 @@ func main() {
 
 	firstPageUrl := "https://pokeapi.co/api/v2/location-area?limit=20&offset=0"
 	config := config{
-		commands:  supportedCommands,
-		locations: page{previous: nil, next: &firstPageUrl},
+		commands:       supportedCommands,
+		locationCursor: cursor{previous: nil, next: &firstPageUrl},
 	}
 	startRepl(&config)
 }

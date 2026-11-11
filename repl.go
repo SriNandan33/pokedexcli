@@ -72,12 +72,12 @@ func buildCommandRegistry() map[string]cliCommand {
 	}
 }
 
-type page struct {
+type cursor struct {
 	previous *string
 	next     *string
 }
 
 type config struct {
-	commands  map[string]cliCommand
-	locations page
+	commands       map[string]cliCommand
+	locationCursor cursor
 }
