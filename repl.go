@@ -59,9 +59,25 @@ func buildCommandRegistry() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Fetch next page of locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Fetch previous page of locations",
+			callback:    commandMapb,
+		},
 	}
 }
 
+type page struct {
+	previous *string
+	next     *string
+}
+
 type config struct {
-	commands map[string]cliCommand
+	commands  map[string]cliCommand
+	locations page
 }
