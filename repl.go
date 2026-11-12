@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/srinandan33/pokedexcli/internal/pokeapi"
 )
 
 func cleanInput(text string) []string {
@@ -31,7 +33,7 @@ func startRepl(cfg *config) {
 
 			err := c.callback(cfg)
 			if err != nil {
-				fmt.Println("Error executing the command", err)
+				fmt.Println(err)
 			}
 		}
 
@@ -80,4 +82,5 @@ type cursor struct {
 type config struct {
 	commands       map[string]cliCommand
 	locationCursor cursor
+	pokeApiClient  *pokeapi.PokeAPIClient
 }

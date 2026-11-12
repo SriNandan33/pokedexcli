@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-
-	"github.com/srinandan33/pokedexcli/internal/pokeapi"
 )
 
 func commandMapf(cfg *config) error {
@@ -13,7 +11,7 @@ func commandMapf(cfg *config) error {
 	}
 
 	url := *cfg.locationCursor.next
-	locationResponse, err := pokeapi.FetchLocations(url)
+	locationResponse, err := cfg.pokeApiClient.FetchLocations(url)
 	if err != nil {
 		return err
 	}
@@ -33,7 +31,7 @@ func commandMapb(cfg *config) error {
 	}
 
 	url := *cfg.locationCursor.previous
-	locationResponse, err := pokeapi.FetchLocations(url)
+	locationResponse, err := cfg.pokeApiClient.FetchLocations(url)
 	if err != nil {
 		return err
 	}
