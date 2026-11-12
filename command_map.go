@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func commandMapf(cfg *config) error {
+func commandMapf(cfg *config, args ...string) error {
 	if cfg.locationCursor.next == nil || *cfg.locationCursor.next == "" {
 		return errors.New("You are on last page!")
 	}
@@ -25,7 +25,7 @@ func commandMapf(cfg *config) error {
 	return nil
 }
 
-func commandMapb(cfg *config) error {
+func commandMapb(cfg *config, args ...string) error {
 	if cfg.locationCursor.previous == nil || *cfg.locationCursor.previous == "" {
 		return errors.New("You are on first page")
 	}

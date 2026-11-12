@@ -24,14 +24,14 @@ func startRepl(cfg *config) {
 			if len(ip) == 0 {
 				continue
 			}
-			command := cleaned[0]
+			command, args := cleaned[0], cleaned[1:]
 			c, ok := cfg.commands[command]
 			if !ok {
 				fmt.Println("Unknown command")
 				continue
 			}
 
-			err := c.callback(cfg)
+			err := c.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -46,7 +46,7 @@ func startRepl(cfg *config) {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, args ...string) error
 }
 
 func buildCommandRegistry() map[string]cliCommand {
@@ -70,6 +70,11 @@ func buildCommandRegistry() map[string]cliCommand {
 			name:        "mapb",
 			description: "Fetch previous page of locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Explore an area to see pokemon",
+			callback:    commandExplore,
 		},
 	}
 }

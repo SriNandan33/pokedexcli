@@ -3,6 +3,7 @@ package pokeapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -15,7 +16,7 @@ type location struct {
 	Url  string `json:"url"`
 }
 
-type locationResponse struct {
+type ListLocationsResponse struct {
 	Count    int        `json:"count"`
 	Next     string     `json:"next"`
 	Previous string     `json:"previous"`
@@ -32,7 +33,7 @@ func CreatePokeApiClient() *PokeAPIClient {
 	}
 }
 
-func (pc *PokeAPIClient) FetchLocations(url string) (locationResponse, error) {
+func (pc *PokeAPIClient) FetchLocations(url string) (ListLocationsResponse, error) {
 	var body []byte
 	fromCache, ok := pc.cache.Get(url)
 	if ok {
@@ -40,25 +41,74 @@ func (pc *PokeAPIClient) FetchLocations(url string) (locationResponse, error) {
 	} else {
 		resp, err := http.Get(url)
 		if err != nil {
-			return locationResponse{}, err
+			return ListLocationsResponse{}, err
 		}
 
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return locationResponse{}, err
+			return ListLocationsResponse{}, err
 		}
 
 		resp.Body.Close()
 		if resp.StatusCode != 200 {
-			return locationResponse{}, errors.New("Error fetching locations")
+			return ListLocationsResponse{}, errors.New("Error fetching locations")
 		}
 		pc.cache.Add(url, body)
 	}
 
-	lr := locationResponse{}
+	lr := ListLocationsResponse{}
 	err := json.Unmarshal(body, &lr)
 	if err != nil {
-		return locationResponse{}, err
+		return ListLocationsResponse{}, err
+	}
+
+	return lr, nil
+}
+
+type Pokemon struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+type PokemonEncounter struct {
+	Pokemon Pokemon `json:"pokemon"`
+}
+
+type LocationAreaResponse struct {
+	// Other properties are ignored as we don't use them
+	PokemonEncounters []PokemonEncounter `json:"pokemon_encounters"`
+}
+
+func (pc *PokeAPIClient) FetchALocation(name string) (LocationAreaResponse, error) {
+	var body []byte
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s", name)
+	fromCache, ok := pc.cache.Get(url)
+	if ok {
+		fmt.Println("Fetching from cache")
+		body = fromCache
+	} else {
+		fmt.Println("Fetched from network")
+		resp, err := http.Get(url)
+		if err != nil {
+			return LocationAreaResponse{}, err
+		}
+
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return LocationAreaResponse{}, err
+		}
+
+		resp.Body.Close()
+		if resp.StatusCode != 200 {
+			return LocationAreaResponse{}, errors.New("Error fetching locations")
+		}
+		pc.cache.Add(url, body)
+	}
+
+	lr := LocationAreaResponse{}
+	err := json.Unmarshal(body, &lr)
+	if err != nil {
+		return LocationAreaResponse{}, err
 	}
 
 	return lr, nil
