@@ -12,7 +12,7 @@ func main() {
 		commands:       supportedCommands,
 		locationCursor: cursor{previous: nil, next: &firstPageUrl},
 		pokeApiClient:  pokeapi.CreatePokeApiClient(),
-		pokedex:        map[string]pokeapi.PokemonWithExperience{},
+		pokedex:        map[string]pokeapi.Pokemon{},
 	}
 	startRepl(&config)
 }

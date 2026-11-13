@@ -65,13 +65,13 @@ func (pc *PokeAPIClient) FetchLocations(url string) (ListLocationsResponse, erro
 	return lr, nil
 }
 
-type Pokemon struct {
+type PokemonShort struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
 
 type PokemonEncounter struct {
-	Pokemon Pokemon `json:"pokemon"`
+	Pokemon PokemonShort `json:"pokemon"`
 }
 
 type LocationAreaResponse struct {
@@ -112,13 +112,30 @@ func (pc *PokeAPIClient) FetchALocation(name string) (LocationAreaResponse, erro
 	return lr, nil
 }
 
-type PokemonWithExperience struct {
-	// Other properties are ignored because we don't need them
-	Name           string `json:"name"`
-	BaseExperience int    `json:"base_experience"`
+type PokemonStats struct {
+	BaseStat int `json:"base_stat"`
+	Stat     struct {
+		Name string `json:"name"`
+	} `json:"stat"`
 }
 
-func (pc *PokeAPIClient) FetchPokemon(name string) (PokemonWithExperience, error) {
+type PokemonTypes struct {
+	Type struct {
+		Name string `json:"name"`
+	} `json:"type"`
+}
+
+type Pokemon struct {
+	// Other properties are ignored because we don't need them
+	Name           string         `json:"name"`
+	BaseExperience int            `json:"base_experience"`
+	Height         int            `json:"height"`
+	Weight         int            `json:"weight"`
+	Stats          []PokemonStats `json:"stats"`
+	Types          []PokemonTypes `json:"types"`
+}
+
+func (pc *PokeAPIClient) FetchPokemon(name string) (Pokemon, error) {
 	var body []byte
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
 	fromCache, ok := pc.cache.Get(url)
@@ -127,28 +144,28 @@ func (pc *PokeAPIClient) FetchPokemon(name string) (PokemonWithExperience, error
 	} else {
 		resp, err := http.Get(url)
 		if err != nil {
-			return PokemonWithExperience{}, err
+			return Pokemon{}, err
 		}
 
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return PokemonWithExperience{}, err
+			return Pokemon{}, err
 		}
 
 		resp.Body.Close()
 		if resp.StatusCode == 404 {
-			return PokemonWithExperience{}, fmt.Errorf("%s not found!", name)
+			return Pokemon{}, fmt.Errorf("%s not found!", name)
 		}
 		if resp.StatusCode != 200 {
-			return PokemonWithExperience{}, errors.New("Error fetching locations")
+			return Pokemon{}, errors.New("Error fetching locations")
 		}
 		pc.cache.Add(url, body)
 	}
 
-	p := PokemonWithExperience{}
+	p := Pokemon{}
 	err := json.Unmarshal(body, &p)
 	if err != nil {
-		return PokemonWithExperience{}, err
+		return Pokemon{}, err
 	}
 
 	return p, nil
