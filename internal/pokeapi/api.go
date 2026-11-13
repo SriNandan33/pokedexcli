@@ -84,10 +84,8 @@ func (pc *PokeAPIClient) FetchALocation(name string) (LocationAreaResponse, erro
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s", name)
 	fromCache, ok := pc.cache.Get(url)
 	if ok {
-		fmt.Println("Fetching from cache")
 		body = fromCache
 	} else {
-		fmt.Println("Fetched from network")
 		resp, err := http.Get(url)
 		if err != nil {
 			return LocationAreaResponse{}, err
@@ -100,7 +98,7 @@ func (pc *PokeAPIClient) FetchALocation(name string) (LocationAreaResponse, erro
 
 		resp.Body.Close()
 		if resp.StatusCode != 200 {
-			return LocationAreaResponse{}, errors.New("Error fetching locations")
+			return LocationAreaResponse{}, errors.New("Error fetching pokemon")
 		}
 		pc.cache.Add(url, body)
 	}
@@ -112,4 +110,46 @@ func (pc *PokeAPIClient) FetchALocation(name string) (LocationAreaResponse, erro
 	}
 
 	return lr, nil
+}
+
+type PokemonWithExperience struct {
+	// Other properties are ignored because we don't need them
+	Name           string `json:"name"`
+	BaseExperience int    `json:"base_experience"`
+}
+
+func (pc *PokeAPIClient) FetchPokemon(name string) (PokemonWithExperience, error) {
+	var body []byte
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
+	fromCache, ok := pc.cache.Get(url)
+	if ok {
+		body = fromCache
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return PokemonWithExperience{}, err
+		}
+
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return PokemonWithExperience{}, err
+		}
+
+		resp.Body.Close()
+		if resp.StatusCode == 404 {
+			return PokemonWithExperience{}, fmt.Errorf("%s not found!", name)
+		}
+		if resp.StatusCode != 200 {
+			return PokemonWithExperience{}, errors.New("Error fetching locations")
+		}
+		pc.cache.Add(url, body)
+	}
+
+	p := PokemonWithExperience{}
+	err := json.Unmarshal(body, &p)
+	if err != nil {
+		return PokemonWithExperience{}, err
+	}
+
+	return p, nil
 }

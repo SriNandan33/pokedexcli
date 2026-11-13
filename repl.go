@@ -76,6 +76,11 @@ func buildCommandRegistry() map[string]cliCommand {
 			description: "Explore an area to see pokemon",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Catch a pokemon",
+			callback:    commandCatch,
+		},
 	}
 }
 
@@ -88,4 +93,5 @@ type config struct {
 	commands       map[string]cliCommand
 	locationCursor cursor
 	pokeApiClient  *pokeapi.PokeAPIClient
+	pokedex        map[string]pokeapi.PokemonWithExperience
 }
